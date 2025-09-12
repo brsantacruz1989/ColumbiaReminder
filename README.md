@@ -1,6 +1,12 @@
-# Demo Next.js + MUI: Login (ES)
+# Columbia Reminder (Universidad Columbia) — Next.js + MUI: Login (ES)
 
-Proyecto de ejemplo con Next.js (App Router) + React + TypeScript + Material UI para implementar el flujo de Login con DB PostgreSQL sin ORM.
+Este repositorio pertenece a “Columbia Reminder”, un sistema de recordatorios de eventos para la Universidad Columbia. La visión del producto es ofrecer a estudiantes, docentes y personal un panel tipo dashboard para:
+
+- Gestionar eventos académicos y administrativos (clases, exámenes, inscripciones, vencimientos).
+- Programar recordatorios por fecha/hora (notificaciones futuras por email u otros canales).
+- Visualizar calendario y listas de pendientes filtradas por materia, carrera o dependencia.
+
+En esta entrega inicial se implementa únicamente el flujo de autenticación (login) como base del dashboard.
 
 ## Requisitos
 
