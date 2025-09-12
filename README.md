@@ -4,65 +4,129 @@ Proyecto de ejemplo con Next.js (App Router) + React + TypeScript + Material UI 
 
 ## Requisitos
 
-- Node.js 18+
-- PostgreSQL accesible vía `DATABASE_URL`
+- Windows 11
+- Node.js 18.17+ o 20+ (LTS recomendado)
+- PostgreSQL 13+ (con `psql` o pgAdmin)
 
-## Configuración
+## Instalación en Windows 11 (paso a paso)
 
-1) Copia las variables de entorno:
+1) Instalar Node.js
+
+- Descarga Node LTS desde https://nodejs.org y sigue el instalador. Acepta agregar Node al PATH.
+- Verifica en PowerShell:
 
 ```
-cp .env.example .env
+node -v
+npm -v
 ```
 
-Edita `.env` con tus valores (DB y secreto de sesión).
+2) Instalar PostgreSQL
 
-2) Instala dependencias:
+- Descarga el instalador desde https://www.postgresql.org/download/windows/
+- Durante la instalación:
+  - Anota la contraseña del usuario `postgres` (administrador).
+  - Asegúrate de instalar componentes: Server, `psql` (Command Line Tools) y pgAdmin (opcional).
+- Verifica `psql` en PowerShell (ajusta la ruta según tu versión):
+
+```
+"C:\Program Files\PostgreSQL\16\bin\psql.exe" --version
+```
+
+3) Clonar/descargar este proyecto y abrir PowerShell en la carpeta del repo
+
+4) Instalar dependencias
 
 ```
 npm install
 ```
 
-3) Crea la base de datos `CR` (una vez):
+5) Configurar variables de entorno (.env)
+
+- Crea el archivo `.env` a partir del ejemplo:
+
+```
+Copy-Item .env.example .env
+```
+
+- Edita `.env` y establece al menos:
+
+```
+DATABASE_URL=postgres://postgres:TU_CONTRASENA@localhost:5432/postgres
+SESSION_SECRET=super-secreto-cambia-esto
+```
+
+Nota: inicialmente apuntamos a la BD `postgres` para poder crear la nueva BD `CR` con el script. Luego cambiaremos `DATABASE_URL` para apuntar a `CR`.
+
+6) Crear la base de datos CR
 
 ```
 npm run db:create
 ```
 
-Asegúrate de que tu `DATABASE_URL` tenga credenciales válidas al servidor. El script se conecta a la BD `postgres` y crea `CR` si no existe. Puedes cambiar el nombre con `TARGET_DB_NAME` si lo necesitas.
+Este script:
+- Usa `DATABASE_URL` para conectarse al servidor (cambiando internamente a la BD `postgres`).
+- Crea la base `CR` si no existe. Para otro nombre, define `TARGET_DB_NAME` en el entorno.
 
-4) Aplica el esquema SQL (fuente de verdad: `schema.sql`) sobre la BD de tu `DATABASE_URL` (idealmente apuntando a `CR`):
+7) Cambiar `DATABASE_URL` para apuntar a CR
+
+Edita `.env` y reemplaza la parte final por `/CR`:
+
+```
+DATABASE_URL=postgres://postgres:TU_CONTRASENA@localhost:5432/CR
+```
+
+8) Aplicar el esquema SQL (fuente de verdad: `schema.sql`)
 
 ```
 npm run db:apply
 ```
 
-Este script lee `schema.sql` y lo ejecuta contra `DATABASE_URL` usando `pg`.
+Esto crea la tabla `users` y el trigger de `updated_at`.
 
-5) (Opcional) Crea un usuario de prueba. Primero genera un hash:
+9) Crear un usuario de prueba
+
+a) Genera el hash de una contraseña:
 
 ```
 npm run user:hash
-# Ingresa una contraseña y copia el hash
+# Escribe, por ejemplo: 123456 y copia el hash resultante
 ```
 
-Luego inserta el usuario en la tabla (p.ej. usando `psql` o tu cliente preferido):
+b) Inserta el usuario con `psql` (dos opciones):
 
-```sql
-INSERT INTO users (name, email, password_hash) VALUES (
-  'Usuario Demo',
-  'demo@acme.com',
-  '<PEGA_AQUI_EL_HASH>'
-);
+- Usando la ruta completa a `psql` (ajusta versión si corresponde):
+
+```
+"C:\Program Files\PostgreSQL\16\bin\psql.exe" -h localhost -U postgres -d CR -c "INSERT INTO users (name, email, password_hash) VALUES ('Usuario Demo','demo@acme.com','<PEGA_AQUI_EL_HASH>');"
 ```
 
-6) Levanta el entorno de desarrollo:
+- O abriendo la consola `SQL Shell (psql)` y ejecutando:
+
+```
+Host: localhost
+Database: CR
+Port: 5432
+Username: postgres
+Password: (tu contraseña)
+
+CR=# INSERT INTO users (name, email, password_hash) VALUES ('Usuario Demo','demo@acme.com','<PEGA_AQUI_EL_HASH>');
+```
+
+También puedes usar pgAdmin para insertar el registro manualmente.
+
+10) Ejecutar en desarrollo
 
 ```
 npm run dev
 ```
 
 Abre `http://localhost:3000`.
+
+11) Probar login
+
+- Ve a `http://localhost:3000/auth/login`.
+- Usa el email `demo@acme.com` y la contraseña que hasheaste (por ejemplo `123456`).
+- Si es correcto, verás el dashboard con el saludo y el email de sesión.
 
 ## Estructura relevante
 
@@ -102,12 +166,27 @@ Abre `http://localhost:3000`.
 
 Consulta `.env.example`:
 
-- `DATABASE_URL`: cadena de conexión de Postgres.
+- `DATABASE_URL`: cadena de conexión de Postgres, por ejemplo: `postgres://usuario:password@localhost:5432/CR`
 - `SESSION_SECRET`: secreto para firmar el JWT de sesión.
 - `SESSION_COOKIE_NAME`: nombre de la cookie de sesión (opcional, por defecto `app_sesion`).
 - `SESSION_COOKIE_MAX_AGE_DAYS`: días de duración de la cookie (por defecto `7`).
 
+## Comandos útiles
+
+- `npm run db:create`: crea la base `CR` si no existe (usa `TARGET_DB_NAME` para cambiar nombre).
+- `npm run db:apply`: aplica `schema.sql` contra `DATABASE_URL`.
+- `npm run user:hash`: genera un hash `bcrypt` para contraseñas de prueba.
+- `npm run dev`: inicia el servidor de desarrollo en `http://localhost:3000`.
+
+## Solución de problemas (Windows)
+
+- `Error: connect ECONNREFUSED 127.0.0.1:5432` → PostgreSQL no está iniciado o el puerto es distinto. Abre “Servicios” y verifica “postgresql-x64-XX” esté en ejecución. Confirma el puerto en el instalador (por defecto 5432).
+- `psql: not recognized` → usa la ruta completa a `psql.exe` o agrega `C:\Program Files\PostgreSQL\XX\bin` al PATH del sistema.
+- `Fallo al iniciar sesión (401)` → verifica que el correo exista en `users` y que el `password_hash` corresponde a la contraseña. Vuelve a generar hash con `npm run user:hash`.
+- Puerto 3000 en uso → inicia con otro puerto: `set PORT=3001 && npm run dev` (CMD) o `$env:PORT=3001; npm run dev` (PowerShell).
+- Bases de datos en la nube que requieren SSL → agrega parámetros a `DATABASE_URL`, por ejemplo `?sslmode=require` (según tu proveedor).
+
 ## Notas
 
 - No se usan ORMs ni migraciones automáticas; toda la DB se define en `schema.sql`.
-- Para cambiar la DB, edita `schema.sql` y vuelve a ejecutar `npm run db:apply`.
+- Para cambiar la DB, edita `schema.sql` y ejecuta `npm run db:apply`.
