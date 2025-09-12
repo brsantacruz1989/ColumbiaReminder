@@ -1,5 +1,7 @@
 -- Esquema mínimo de usuarios para autenticación
 -- Fuente de verdad: edita este archivo para cambios de DB
+-- Nota: La creación de la base de datos "CR" se realiza con el script
+--       `npm run db:create` para evitar transacciones alrededor de CREATE DATABASE.
 
 -- Opcional: configura zona horaria
 -- SET TIME ZONE 'UTC';
@@ -38,4 +40,3 @@ BEGIN
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
   END IF;
 END $$;
-

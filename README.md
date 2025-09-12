@@ -23,7 +23,15 @@ Edita `.env` con tus valores (DB y secreto de sesión).
 npm install
 ```
 
-3) Aplica el esquema SQL (fuente de verdad: `schema.sql`):
+3) Crea la base de datos `CR` (una vez):
+
+```
+npm run db:create
+```
+
+Asegúrate de que tu `DATABASE_URL` tenga credenciales válidas al servidor. El script se conecta a la BD `postgres` y crea `CR` si no existe. Puedes cambiar el nombre con `TARGET_DB_NAME` si lo necesitas.
+
+4) Aplica el esquema SQL (fuente de verdad: `schema.sql`) sobre la BD de tu `DATABASE_URL` (idealmente apuntando a `CR`):
 
 ```
 npm run db:apply
@@ -31,7 +39,7 @@ npm run db:apply
 
 Este script lee `schema.sql` y lo ejecuta contra `DATABASE_URL` usando `pg`.
 
-4) (Opcional) Crea un usuario de prueba. Primero genera un hash:
+5) (Opcional) Crea un usuario de prueba. Primero genera un hash:
 
 ```
 npm run user:hash
@@ -48,7 +56,7 @@ INSERT INTO users (name, email, password_hash) VALUES (
 );
 ```
 
-5) Levanta el entorno de desarrollo:
+6) Levanta el entorno de desarrollo:
 
 ```
 npm run dev
@@ -103,4 +111,3 @@ Consulta `.env.example`:
 
 - No se usan ORMs ni migraciones automáticas; toda la DB se define en `schema.sql`.
 - Para cambiar la DB, edita `schema.sql` y vuelve a ejecutar `npm run db:apply`.
-
