@@ -13,7 +13,10 @@ export async function POST(req: NextRequest) {
   const json = await req.json().catch(() => null);
   const parsed = bodySchema.safeParse(json);
   if (!parsed.success) {
-    return NextResponse.json({ message: 'Datos inválidos' }, { status: 400 });
+    return NextResponse.json(
+      { type: 'validation', message: 'Datos inválidos', issues: parsed.error.flatten() },
+      { status: 400 }
+    );
   }
 
   const { email, password } = parsed.data;
@@ -26,12 +29,12 @@ export async function POST(req: NextRequest) {
     );
     const user = rows[0];
     if (!user) {
-      return NextResponse.json({ message: 'Credenciales inválidas' }, { status: 401 });
+      return NextResponse.json({ type: 'auth', message: 'Credenciales inválidas: usuario no encontrado' }, { status: 401 });
     }
 
     const valid = await verifyPassword(password, user.password_hash);
     if (!valid) {
-      return NextResponse.json({ message: 'Credenciales inválidas' }, { status: 401 });
+      return NextResponse.json({ type: 'auth', message: 'Credenciales inválidas: contraseña incorrecta' }, { status: 401 });
     }
 
     const token = await createSessionToken({ sub: String(user.id), name: user.name, email: user.email }, getCookieMaxAgeSeconds() / 86400);
@@ -45,9 +48,14 @@ export async function POST(req: NextRequest) {
       maxAge: getCookieMaxAgeSeconds()
     });
     return res;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error en login:', err);
-    return NextResponse.json({ message: 'Error interno' }, { status: 500 });
+    const code = err?.code || 'UNKNOWN';
+    const detail = process.env.NODE_ENV === 'development' ? String(err?.message || err) : undefined;
+    return NextResponse.json(
+      { type: 'db', message: `Error en base de datos (código: ${code})`, detail },
+      { status: 500 }
+    );
   }
 }
 
