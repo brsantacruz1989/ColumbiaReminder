@@ -7,11 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:create": "ts-node --transpile-only scripts/create-db.ts",
-    "db:apply": "ts-node --transpile-only scripts/apply-schema.ts",
-    "user:hash": "ts-node --transpile-only scripts/hash-password.ts"
+    "db:create": "ts-node -P tsconfig.scripts.json --transpile-only scripts/create-db.ts",
+    "db:apply": "ts-node -P tsconfig.scripts.json --transpile-only scripts/apply-schema.ts",
+    "user:hash": "ts-node -P tsconfig.scripts.json --transpile-only scripts/hash-password.ts"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.20",

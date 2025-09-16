@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Pool } from 'pg';
 
 const TARGET_DB = process.env.TARGET_DB_NAME || 'CR';
@@ -32,4 +33,3 @@ async function main() {
 }
 
 main();
-

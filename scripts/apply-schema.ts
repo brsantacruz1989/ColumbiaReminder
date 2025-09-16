@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { readFileSync } from 'node:fs';
 import { Pool } from 'pg';
 
@@ -31,4 +32,3 @@ async function main() {
 }
 
 main();
-
