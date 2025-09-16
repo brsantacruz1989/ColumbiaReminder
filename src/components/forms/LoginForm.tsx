@@ -44,7 +44,8 @@ export default function LoginForm() {
         router.replace('/');
       } else {
         const body = await res.json().catch(() => ({}));
-        setSubmitError(body?.message || 'No se pudo iniciar sesión.');
+        const prefix = body?.type === 'db' ? '[DB] ' : body?.type === 'auth' ? '[AUTH] ' : '';
+        setSubmitError(prefix + (body?.message || 'No se pudo iniciar sesión.'));
       }
     } catch (err) {
       setSubmitError('Error de red. Intenta de nuevo.');
@@ -52,7 +53,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form noValidate onSubmit={(e) => { e.preventDefault(); }}>
       <Stack spacing={2}>
         {submitError && (
           <Alert role="alert" severity="error" aria-live="assertive">
@@ -77,7 +78,8 @@ export default function LoginForm() {
           {...register('password')}
         />
         <Button
-          type="submit"
+          type="button"
+          onClick={handleSubmit(onSubmit)}
           variant="contained"
           disabled={isSubmitting}
           aria-busy={isSubmitting}
