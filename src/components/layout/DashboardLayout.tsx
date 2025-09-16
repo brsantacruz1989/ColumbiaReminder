@@ -11,11 +11,14 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Button';
 import HomeIcon from '@mui/icons-material/Home';
 import EventIcon from '@mui/icons-material/Event';
 import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useRouter } from 'next/navigation';
 
 const drawerWidth = 280;
 
@@ -25,6 +28,19 @@ export type DashboardLayoutProps = {
 };
 
 export default function DashboardLayout({ children, user }: DashboardLayoutProps) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (res.ok) {
+        router.replace('/auth/login');
+      }
+    } catch {
+      // noop
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" color="primary" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
@@ -33,9 +49,14 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
             Columbia Reminder
           </Typography>
           {user && (
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              {user.name} · {user.email}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                {user.name} · {user.email}
+              </Typography>
+              <Button size="small" color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>
+                Cerrar sesión
+              </Button>
+            </Box>
           )}
         </Toolbar>
       </AppBar>
@@ -106,4 +127,3 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
     </Box>
   );
 }
-
