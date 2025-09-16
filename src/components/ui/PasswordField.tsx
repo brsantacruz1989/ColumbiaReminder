@@ -11,6 +11,7 @@ type Props = {
   name?: string;
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+  onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   error?: boolean;
   helperText?: React.ReactNode;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
@@ -18,13 +19,17 @@ type Props = {
   required?: boolean;
 };
 
-export default function PasswordField({ label = 'Contraseña', ...props }: Props) {
+const PasswordField = React.forwardRef<HTMLInputElement, Props>(function PasswordField(
+  { label = 'Contraseña', ...props },
+  ref
+) {
   const [show, setShow] = React.useState(false);
   return (
     <TextField
       type={show ? 'text' : 'password'}
       label={label}
       autoComplete="current-password"
+      inputRef={ref}
       {...props}
       InputProps={{
         endAdornment: (
@@ -41,5 +46,7 @@ export default function PasswordField({ label = 'Contraseña', ...props }: Props
       }}
     />
   );
-}
+});
+
+export default PasswordField;
 
